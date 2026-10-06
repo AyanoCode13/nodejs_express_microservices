@@ -1,0 +1,44 @@
+name: Microservices Health Check
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  health-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Install Dependencies
+        run: bun install
+
+      - name: Run Unit & Integration Tests
+        run: bun test
+
+      - name: Start Services Concurrently
+        run: |
+          bun start:dev &
+          echo "Services starting in background..."
+
+      - name: Wait for Services & Run Live Health Checks
+        run: |
+          echo "Waiting for services to spin up..."
+          sleep 3
+
+          echo "Checking Orders Microservice direct health check (port 3002)..."
+          curl --fail http://localhost:3002/healthy || exit 1
+
+          echo "Checking Gateway routed health check (port 8080)..."
+          curl --fail http://localhost:8080/orders/healthy || exit 1
+
+          echo "All health checks passed successfully!"
