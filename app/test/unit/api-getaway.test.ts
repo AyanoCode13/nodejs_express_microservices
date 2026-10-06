@@ -40,7 +40,7 @@ describe("API Gateway", () => {
   });
 
   test("should proxy /healthy route", async () => {
-    const response = await request(gatewayApp).get("/orders/healthy");
+    const response = await request(gatewayApp).get("/orders/health");
     expect(response.status).toBe(200);
     expect(response.body.status).toBe("UP");
   });
