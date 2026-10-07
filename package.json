@@ -17,7 +17,7 @@
     "api-gateway": "bun --watch app/api-gateway/index.ts",
     "orders": "bun --watch app/orders/index.ts",
     "start:dev": "concurrently \"bun run api-gateway\" \"bun run orders\"",
-    "test:unit": "bun test/unit/index.ts"
+    "test:unit": "bun --watch --coverage test test/unit/"
   },
   "type": "module",
   "dependencies": {

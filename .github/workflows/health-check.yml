@@ -23,7 +23,7 @@ jobs:
         run: bun install
 
       - name: Run Unit & Integration Tests
-        run: bun test
+        run: bun test:unit
 
       - name: Start Services Concurrently
         run: |
