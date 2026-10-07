@@ -15,13 +15,13 @@ app.get("/health", (req, res) => {
 });
 
 // GET /orders
-app.get("/orders", (req, res) => {
+app.get("/", (req, res) => {
   res.json({
     service: "Orders Microservice",
     data: orders
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`Orders Microservice running on http://localhost:${PORT}`);
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Main App running on http://localhost:${PORT}`);
 });

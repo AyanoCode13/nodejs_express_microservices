@@ -5,6 +5,7 @@
     "@types/bun": "latest",
     "@types/express-http-proxy": "^1.6.7",
     "@types/supertest": "^7.2.1",
+    "concurrently": "^10.0.5",
     "supertest": "^7.3.1"
   },
   "peerDependencies": {
@@ -12,11 +13,11 @@
   },
   "private": true,
   "scripts": {
-    "api-gateway": "bun --hot app/api-gateway/index.ts",
-    "orders": "bun --hot app/orders/index.ts",
-    "start:dev": "bun api-gateway & bun orders",
-
-    "test:unit" :"bun test/unit/index.ts"
+    "main": "bun --watch app/index.ts",
+    "api-gateway": "bun --watch app/api-gateway/index.ts",
+    "orders": "bun --watch app/orders/index.ts",
+    "start:dev": "concurrently \"bun run api-gateway\" \"bun run orders\"",
+    "test:unit": "bun test/unit/index.ts"
   },
   "type": "module",
   "dependencies": {

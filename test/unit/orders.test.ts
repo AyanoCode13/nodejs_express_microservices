@@ -12,12 +12,12 @@ const orders = [
 ];
 
 
-app.get("/orders", (req, res) => {
+app.get("/", (req, res) => {
   res.json({ service: "Orders Microservice", data: orders });
 });
 describe("Orders Microservice", () => {
   test("GET /orders should return list of orders", async () => {
-    const response = await request(app).get("/orders");
+    const response = await request(app).get("/");
 
     expect(response.status).toBe(200);
     expect(response.body.service).toBe("Orders Microservice");
@@ -28,7 +28,7 @@ describe("Orders Microservice", () => {
 
 describe("Orders Microservice", () => {
   test("GET /orders should return list of orders", async () => {
-    const response = await request(app).get("/orders");
+    const response = await request(app).get("/");
 
     expect(response.status).toBe(200);
     expect(response.body.service).toBe("Orders Microservice");

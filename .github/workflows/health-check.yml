@@ -36,9 +36,9 @@ jobs:
           sleep 3
 
           echo "Checking Orders Microservice direct health check (port 3002)..."
-          curl --fail http://localhost:3002/healthy || exit 1
+          curl --fail http://localhost:3002/health || exit 1
 
           echo "Checking Gateway routed health check (port 8080)..."
-          curl --fail http://localhost:8080/orders/healthy || exit 1
+          curl --fail http://localhost:8080/orders/health || exit 1
 
           echo "All health checks passed successfully!"
