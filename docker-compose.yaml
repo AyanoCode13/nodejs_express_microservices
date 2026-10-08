@@ -1,0 +1,31 @@
+services:
+  orders:
+    build:
+      context: .
+      args:
+        SERVICE: orders
+        PORT: 3002
+    healthcheck:
+      # Uses Node.js to ping /health on port 3002. Exits 0 if HTTP status is 200, otherwise 1.
+      test: ["CMD-SHELL", "bun -e 'require(\"http\").get(\"http://localhost:3002/health\", (r) => process.exit(r.statusCode === 200 ? 0 : 1))'"] 
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  api-gateway:
+    build:
+      context: .
+      args:
+        SERVICE: api-gateway
+        PORT: 8080
+    ports:
+      - "8080:8080"
+    environment:
+      URL: http://localhost:8080
+      PORT: 8080
+      ORDERS_PORT: 3002
+      ORDERS_ROUTE: "/orders"
+      ORDERS_URL: http://localhost:3002
+    depends_on:
+      orders:
+        condition: service_healthy

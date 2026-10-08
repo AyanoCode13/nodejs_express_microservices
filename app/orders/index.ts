@@ -23,5 +23,5 @@ app.get("/", (req, res) => {
 });
 
 app.listen(PORT, "0.0.0.0", () => {
-  console.log(`Main App running on http://localhost:${PORT}`);
+  console.log(`Orders Microservice running on http://localhost:${PORT}`);
 });

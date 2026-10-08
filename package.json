@@ -13,7 +13,7 @@
   },
   "private": true,
   "scripts": {
-    "main": "bun --watch app/index.ts",
+    "products": "bun --watch app/products/index.ts",
     "api-gateway": "bun --watch app/api-gateway/index.ts",
     "orders": "bun --watch app/orders/index.ts",
     "start:dev": "concurrently \"bun run api-gateway\" \"bun run orders\"",

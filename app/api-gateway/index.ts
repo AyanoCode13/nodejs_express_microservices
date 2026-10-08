@@ -1,22 +1,24 @@
 import express from "express";
 import proxy from "express-http-proxy";
+import { appConfig } from "../env";
 
 const app = express();
-const PORT = 8080;
 
 // Route /orders requests to Order Service (port 3002)
 app.use(
-  "/orders",
-  proxy("http://localhost:3002", {
+  appConfig.orders.ROUTE,
+  proxy(appConfig.orders.URL, {
     proxyReqPathResolver: (req) => req.url
-  })
+  }),
 );
+
+
 
 // Base route handler
 app.get("/", (req, res) => {
   res.json({ message: "API Gateway is active" });
 });
 
-app.listen(PORT,() => {
-  console.log(`API Gateway running on http://localhost:${PORT}`);
+app.listen(appConfig.gateway.PORT,() => {
+  console.log(`API Gateway running on ${appConfig.gateway.URL}`);
 });
