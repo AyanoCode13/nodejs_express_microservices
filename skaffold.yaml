@@ -1,0 +1,19 @@
+apiVersion: skaffold/v4beta7
+kind: Config
+build:
+  local:
+    push: false
+  artifacts:
+    - image: nodejs_express_microservices-api-gateway
+      context: .
+      docker:
+        dockerfile: Dockerfile
+    - image: nodejs_express_microservices-orders
+      context: .
+      docker:
+        dockerfile: Dockerfile
+manifests:
+  rawYaml:
+    - ./k8s/configMap.yaml
+    - ./k8s/api-gateway.yaml
+    - ./k8s/orders/orders.yaml
