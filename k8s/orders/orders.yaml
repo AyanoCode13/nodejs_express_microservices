@@ -1,20 +1,48 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: orders
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: orders-service
+spec:
+  type: ClusterIP
+  selector:
+    app: orders
+  ports:
+    - port: 3002
+      targetPort: 3002
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: orders-deployment
 spec:
-  replicas: 3
+  replicas: 2
   selector:
     matchLabels:
       app: orders
   template:
     metadata:
+      annotations:
+        vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/role: "orders"
+        vault.hashicorp.com/agent-inject-secret-db: "secret/data/orders/db"
+        vault.hashicorp.com/agent-inject-template-db: |
+          {{- with secret "secret/data/orders/db" -}}
+          export DATABASE_URL="{{ .Data.data.url }}"
+          {{- end }}
       labels:
         app: orders
     spec:
+      serviceAccountName: orders
       containers:
         - name: orders
           image: nodejs_express_microservices-orders:latest # Replace with your image
+          command: ["sh", "-c", ". /vault/secrets/db && exec bun run app/orders/index.ts"]
           imagePullPolicy: IfNotPresent
           resources:
             requests:
@@ -45,15 +73,5 @@ spec:
               port: 3002
             initialDelaySeconds: 10
             periodSeconds: 10
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: orders-service
-spec:
-  type: ClusterIP
-  selector:
-    app: orders
-  ports:
-    - port: 3002
-      targetPort: 3002
+
+

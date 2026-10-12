@@ -1,4 +1,5 @@
 import express from "express";
+import { db } from "../../src/prisma/db";
 
 const app = express();
 const PORT = 3002;
@@ -15,7 +16,13 @@ app.get("/health", (req, res) => {
 });
 
 // GET /orders
-app.get("/", (req, res) => {
+app.get("/", async (req, res) => {
+   const query = db.sql.public.orders
+    .select("id", "item")
+    .limit(2)
+    .build();
+  const rows = await db.runtime().query(query);
+  console.log(rows);
   res.json({
     service: "Orders Microservice",
     data: orders

@@ -15,6 +15,7 @@ spec:
       containers:
         - name: api-gateway
           image: nodejs_express_microservices-api-gateway:latest # Replace with your image
+          command: ["bun", "run", "app/api-gateway/index.ts"]
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080

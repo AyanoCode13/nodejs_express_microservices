@@ -1,0 +1,10 @@
+// use prisma-8
+// Contract inferred from the live database schema. Edit as needed, then run `prisma contract emit`.
+
+model Orders {
+  id        Int               @id(map: "orders_pkey") @default(autoincrement())
+  item      String
+  createdAt TimestamptzString @default(now()) @map("created_at")
+
+  @@map("orders")
+}
