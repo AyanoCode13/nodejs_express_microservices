@@ -1,0 +1,75 @@
+# Save as .github/workflows/skaffold-integration.yml
+#
+# Spins up a throwaway minikube on the GitHub runner, installs Vault, configures it,
+# runs Skaffold once (build + deploy), then smoke-tests the gateway.
+#
+# Requires a repository secret named DATABASE_URL
+# (Settings -> Secrets and variables -> Actions -> New repository secret).
+
+name: Skaffold integration test
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: skaffold-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Same runtime requirement as locally: Skaffold builds into minikube's Docker daemon.
+      # Check the action's README for its current version and inputs.
+      - name: Start minikube
+        uses: medyagh/setup-minikube@latest
+        with:
+          driver: docker
+          container-runtime: docker
+
+      # kubectl and helm are preinstalled on GitHub's ubuntu runners.
+      - name: Install Skaffold
+        run: |
+          curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/latest/skaffold-linux-amd64
+          sudo install skaffold /usr/local/bin/skaffold
+          skaffold version
+
+      # --wait blocks until vault-0 and the injector are Ready, so pods created later get injected.
+      - name: Install Vault (dev mode)
+        run: |
+          helm repo add hashicorp https://helm.releases.hashicorp.com
+          helm install vault hashicorp/vault --set "server.dev.enabled=true" --wait --timeout 3m
+
+      # Vault must be configured BEFORE the orders pod starts, otherwise it hangs in Init.
+      - name: Configure Vault
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: sh scripts/vault-setup.sh
+
+      # `skaffold dev` is a watch loop that never exits; `skaffold run` builds, deploys,
+      # waits for the rollout to stabilize, then exits (non-zero if the rollout fails).
+      - name: Build and deploy with Skaffold
+        run: skaffold run
+
+      - name: Smoke test through the gateway
+        run: |
+          kubectl port-forward svc/api-gateway-service 8080:8080 &
+          curl -fsS --retry 10 --retry-delay 3 --retry-connrefused http://localhost:8080/orders
+
+      - name: Dump diagnostics
+        if: failure()
+        run: |
+          kubectl get pods,svc,endpoints
+          kubectl describe pods
+          kubectl logs -l app=orders -c orders --tail=100 || true
+          kubectl logs -l app=orders -c vault-agent-init --tail=50 || true
