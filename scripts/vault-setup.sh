@@ -18,4 +18,6 @@ vault write auth/kubernetes/role/orders \
   policies=orders ttl=1h
 '
 
-kubectl rollout restart deploy/orders-deployment
+if kubectl get deploy orders-deployment >/dev/null 2>&1; then
+  kubectl rollout restart deploy/orders-deployment
+fi
